@@ -1,14 +1,10 @@
-package com.example.compose_crash
+package com.example.swingissue
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Icon
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposePanel
 import com.intellij.openapi.project.DumbAware
@@ -17,22 +13,20 @@ import com.intellij.openapi.wm.ToolWindow
 import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.util.ui.components.BorderLayoutPanel
 
-class CrashToolWindow : ToolWindowFactory, DumbAware {
+val LocalProject = staticCompositionLocalOf<Project> { error("LocalProject not provided") }
+
+class SwingEditorToolWindow : ToolWindowFactory, DumbAware {
 
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
+        System.setProperty("compose.swing.render.on.graphics", "true")
+        System.setProperty("compose.interop.blending", "true")
+
         toolWindow.addComposePanel {
             MaterialTheme {
-                Column(modifier = Modifier.height(IntrinsicSize.Max)) {
-                    TextField(
-                        value = "test",
-                        onValueChange = { },
-                        trailingIcon = {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                            )
-                        },
-                    )
+                CompositionLocalProvider(LocalProject provides project) {
+                    IntellijEditorTextField(
+                        modifier = Modifier.fillMaxSize(),
+                        text = SAMPLE_CODE_BLOCK)
                 }
             }
         }
